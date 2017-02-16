@@ -1,0 +1,8 @@
+build/
+*.zip
+*.jasper
+*.log
+JasperCustomRunner.groovy
+JasperCustomRunnerTestCase.groovy
+.settings/
+/bin/
