@@ -1,4 +1,4 @@
-package dijkstra
+package graph.dijkstra
 
 import graph.Edge
 import graph.Graph
