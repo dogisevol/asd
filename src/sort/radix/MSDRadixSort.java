@@ -1,4 +1,4 @@
-package sort;
+package sort.radix;
 
 /*
 is cache-inefficient

@@ -1,4 +1,4 @@
-package sort;
+package sort.radix;
 
 /*
 Comparing to standards quicksort
@@ -10,7 +10,7 @@ and this is a common case)
 Comparing to MSD string sort
 1) Has a short inner loop
 2) Is cache-friendly
-3) Is in-place 
+3) Is in-place
 
  */
 public class ThreeWayQuickStringSort extends MSDRadixSort {
