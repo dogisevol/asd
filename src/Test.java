@@ -1,6 +1,11 @@
+import java.math.BigDecimal;
+
 public class Test {
 
 	public static void main(String[] args) {
+
+		System.out.println(BigDecimal.ZERO.compareTo(null));
+
 		Test test = new Test();
 		test.test();
 
