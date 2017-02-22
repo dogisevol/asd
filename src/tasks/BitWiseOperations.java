@@ -5,15 +5,21 @@ package tasks;
  */
 public class BitWiseOperations {
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         BitWiseOperations ops = new BitWiseOperations();
-        System.out.println(ops.add(3, 4));
+//        System.out.println(ops.add(4, 5));
+        System.out.println(ops.negate(-13));
+//        System.out.println(ops.sub(4, 3));
+//        System.out.println(ops.mul(4, 3));
+//        System.out.println(ops.divide(13, 3));
     }
 
 
     int add(int x, int y) {
         int a, b;
         do {
+            System.out.println(x);
+            System.out.println(y);
             a = x & y;
             b = x ^ y;
             x = a << 1;
@@ -23,6 +29,7 @@ public class BitWiseOperations {
     }
 
     int negate(int x) {
+        System.out.println(Integer.toBinaryString(x));
         return add(~x, 1);
     }
 

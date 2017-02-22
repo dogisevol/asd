@@ -8,11 +8,12 @@ Too much overhead reinitializing count[] and aux[]
 
 public class MSDRadixSort {
 
-    private static final int R = 1024;
+    private static final int R = 256;
 
     public static void main(String[] args) {
         MSDRadixSort sort = new MSDRadixSort();
         String[] strings = {"test", "est", "st", "este", "estt", "stet", "test"};
+        strings = new String[]{"te", "es"};
         sort.sort(strings);
         for (String s : strings) {
             System.out.println(s);
