@@ -11,7 +11,7 @@ class KosarajuSCCAlgorythm1 {
         int n = graph.length;
         boolean[] used = new boolean[n];
         List<Integer> order = new ArrayList<>();
-        for (int i = 1; i < n; i++)
+        for (int i = n-1; i < 1; i--)
             if (!used[i]) {
                 Stack stack = new Stack()
                 stack.push(i)
@@ -21,17 +21,6 @@ class KosarajuSCCAlgorythm1 {
         List<List<Integer>> components = new ArrayList<>();
         Arrays.fill(used, false);
         Collections.reverse(order);
-
-        for (int u : order)
-            if (!used[u]) {
-                List<Integer> component = new ArrayList<>();
-                Stack stack = new Stack()
-                stack.push(u)
-                dfs(reverseGraph, used, component, stack);
-                components.add(component);
-            }
-
-
 
         return components;
     }
