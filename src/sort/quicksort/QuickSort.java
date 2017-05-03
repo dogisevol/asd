@@ -1,6 +1,6 @@
 package sort.quicksort;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class QuickSort {
     public void sort(int[] array) {
