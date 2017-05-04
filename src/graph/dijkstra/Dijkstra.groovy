@@ -135,7 +135,7 @@ class TestDijkstraAlgorithm {
 		Graph graph = new Graph(nodes, edges);
 		DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(graph);
 		dijkstra.execute(nodes.get(0));
-		LinkedList<Vertex> path = dijkstra.getPath(nodes.get(5));
+		LinkedList<Vertex> path = dijkstra.getPath(nodes.get(3));
 
 		for (Vertex vertex : path) {
 			System.out.println(vertex);
