@@ -1,16 +1,14 @@
 package stanford.course3.week1
 
-import heap.Heap
-
 
 class PrimHeapAlgorithm {
 
     int find(Map<Integer, Node> graph, Node start) {
         List<Node> result = []
         start.distance = 0
-        def queue = new Heap();
+        def queue = new PriorityQueue();
         start.marked = true
-        queue.add(start)
+        queue.offer(start)
 
         while (!queue.isEmpty()) {
             Node v = queue.poll()
@@ -23,7 +21,9 @@ class PrimHeapAlgorithm {
                         u.distance = edge.weight
                         queue.offer(u)
                     } else if (u.distance > edge.weight) {
+                        queue.remove(u)
                         u.distance = edge.weight
+                        queue.offer(u)
                     }
                 }
             }
@@ -56,7 +56,12 @@ class Node implements Comparable {
 
     @Override
     int compareTo(Object o) {
-        return distance - ((Node) o).distance
+        def d = distance - ((Node) o).distance
+        if (d > 0)
+            return 1
+        if (d < 0)
+            return -1
+        else return 0
     }
 
     @Override
@@ -66,7 +71,7 @@ class Node implements Comparable {
 }
 
 Map<Integer, Node> graph = [:]
-Scanner scanner = new Scanner(new File("test.txt"));
+Scanner scanner = new Scanner(new File("edges.txt"));
 def nodesNumber = scanner.nextInt()
 def edgesNumber = scanner.nextInt()
 (1..nodesNumber).each {
@@ -93,7 +98,7 @@ while (scanner.hasNext()) {
 
 PrimHeapAlgorithm dij = new PrimHeapAlgorithm();
 def list = []
-list.add(dij.find(graph, graph.get(7)))
+list.add(dij.find(graph, graph.get(500)))
 list.sort().each {
     println(it)
 }
