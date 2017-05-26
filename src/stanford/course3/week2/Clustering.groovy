@@ -1,7 +1,5 @@
 package stanford.course3.week2
 
-import javax.jws.soap.SOAPBinding
-
 class KruskalAlgorithm {
 
 

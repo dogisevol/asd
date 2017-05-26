@@ -1,3 +1,5 @@
+package stanford.course3.week3
+
 class TrieNode implements Comparable {
     TrieNode(int id, int weight) {
         this.id = id

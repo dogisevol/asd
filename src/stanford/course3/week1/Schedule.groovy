@@ -1,7 +1,5 @@
 package stanford.course3.week1
 
-import jdk.nashorn.internal.scripts.JO
-
 class Job implements Comparable {
 
     Job(int weight, int length) {

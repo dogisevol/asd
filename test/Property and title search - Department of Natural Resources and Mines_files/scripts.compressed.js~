@@ -1,0 +1,722 @@
+if ("object" != typeof lotplan && (lotplan = {}), "object" != typeof lotplan.components && (lotplan.components = {}), lotplan.components.addresssearchfields = function(e, t) {
+        function r() {
+			//debugger
+            var t = e("#address_search_address");
+            new lotplan.utils.TypeaheadWrapper(t, function(t, r, a) {
+                l.loading(!0);
+                var o = i + encodeURIComponent("LOWER(ADDRESS) like '" + t.toLowerCase().trim() + "%'");
+                return e.get(o).success(function(t) {
+                    l.loading(!1);
+                    var r = [];
+                    return t = JSON.parse(t), t.features.length < 1 ? (l.addressValid(!1), !1) : (t.features.forEach(function(t, a) {
+                        e.inArray(t.attributes.ADDRESS, r) < 0 && (r.push(t.attributes.ADDRESS), l.addressValid(!0))
+                    }), void a(r))
+                })
+            });
+            e("#address_search_address").on("typeahead:selected", function(t, r) {
+                e("#address_search_address").closest("form").submit()
+            }), e(document).on("loadingFinished", !1, function(e) {
+                l.loading(!1)
+            })
+        }
+
+        function a(e) {
+			//debugger
+            l = this, l.loading = t.observable(!1), l.addressValid = t.observable(!1), l.isError = t.observable(!1), l.makeAddressSearch = o, l.resetAddressSearch = n, l.searchText = t.observable("")
+        }
+
+        function o(t, r) {
+			//debugger
+            l.loading(!0), this.isError(!1), lotplan.main.clearData(), l.searchText(e(t).find("#address_search_address").val()), s(e(t).find("#address_search_address").val())
+        }
+
+        function n(t, r) {
+			//debugger
+            e(r.target).closest("form").find('input[type="text"]').val(""), this.isError(!1), lotplan.main.clearData()
+        }
+
+        function s(e) {
+			//debugger
+            lotplan.utils.ajaxRequest(c + encodeURIComponent("ADDRESS='" + e + "'"), "GET", null, lotplan.components.searchresults.setSearchData.bind(l))
+        }
+        var l, i = "https://gisservices.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandParcelPropertyFramework/MapServer/0/query?geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&returnCountOnly=false&returnIdsOnly=false&returnGeometry=false&outFields=ADDRESS&f=json&where=",
+            c = "https://gisservices.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandParcelPropertyFramework/MapServer/0/query?text=&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&returnCountOnly=false&returnIdsOnly=false&returnGeometry=true&outFields=*&f=json&where=";
+        return {
+            setup: r,
+            setError: function(e) {
+                l.isError(e)
+            },
+            viewModel: a,
+            template: {
+                element: "addressSearchFields"
+            },
+            synchronous: !0
+        }
+    }(jQuery, ko), "object" != typeof lotplan && (lotplan = {}), "object" != typeof lotplan.components && (lotplan.components = {}), lotplan.components.review = function(e, t) {
+        function r() {}
+
+        function a(e) {
+			//debugger
+            l = this, l.selectedAddress = t.observableArray(e.selectedAddress()), l.cancel = o, l.addToCart = n, l.goToCart = s, l.added = t.observable()
+        }
+
+        function o(e, t) {
+			//debugger
+            window.location.hash = "page=search"
+        }
+
+        function n(t, r) {
+			//debugger
+            e(r.target).attr("disabled", "disabled"), lotplan.main.addToBasket(l.selectedAddress()[0]), lotplan.utils.setCookie("basket", JSON.stringify(l.selectedAddress()[0]), 60), l.added(!0)
+        }
+
+        function s(t, r) {
+			//debugger
+            e(r.target).attr("disabled", "disabled"), window.location.hash = "page=cart"
+        }
+        var l;
+        return {
+            setup: r,
+            viewModel: a,
+            template: {
+                element: "basketSummary"
+            },
+            synchronous: !0
+        }
+    }(jQuery, ko), "object" != typeof lotplan && (lotplan = {}), "object" != typeof lotplan.components && (lotplan.components = {}), lotplan.components.cart = function(e, t) {
+        function r() {}
+
+        function a(e) {
+			//debugger
+            l = this, l.removeItems = t.observableArray(), l.removeSelectedItems = n, l.givenName = t.observable(), l.familyName = t.observable(), l.email = t.observable(), l.confirmEmail = t.observable(), l.phone = t.observable(), l.accept_tc = t.observable(!1), l.opt_in = t.observable(!1), l.validateBuy = o, l.buyProcess = s, l.alertType = t.observable(""), l.alertMessage = t.observable(""), l.alertClose = function() {
+                l.alertType(""), l.alertMessage("")
+            }
+        }
+
+        function o() {
+			//debugger
+            return (new lotplan.utils.Validator).add("Enter your given name", function() {
+                return this.givenName()
+            }).add("Enter your family name", function() {
+                return this.familyName()
+            }).add("Enter your email address", function() {
+                return this.email()
+            }).add("Enter your phone number", function() {
+                return this.phone()
+            }).add("Confirmation email must be the same as email address", function() {
+                return this.email() === this.confirmEmail()
+            }).add("You must accept the terms, conditions and privacy statement to continue", function() {
+                return this.accept_tc()
+            }).validate(l, function(e, t) {
+                return !!e || (l.alertType("danger"), l.alertMessage(this.errorMessage("<p>The following " + (t > 1 ? "are" : "is") + " required to complete your purchase</p>")), !1)
+            })
+        }
+
+        function n() {
+			//debugger
+            for (var e = 0; e < l.removeItems().length; e++) lotplan.main.cartHelper().remove(l.removeItems()[e]);
+            l.removeItems.removeAll()
+        }
+
+        function s() {
+			//debugger
+            if (confirm("You are about to be sent to our payment service provided by the Commonwealth Bank. Once the payment is confirmed, you will be returned to our website. \n\nClick OK to continue or cancel if you aren't ready to pay yet.")) {
+                for (var e = lotplan.main.cartHelper().items(), t = [], r = 0; r < e.length; r++) t.push({
+                    product_id: e[r].i,
+                    title_reference: e[r].t,
+                    plan_type: e[r].pt,
+                    plan_number: e[r].pn,
+                    lot: e[r].l
+                });
+                var a = {
+                    first_name: l.givenName(),
+                    last_name: l.familyName(),
+                    phone: l.phone(),
+                    email: l.email(),
+                    opt_in: l.opt_in() ? 1 : 0,
+                    entries: t
+                };
+                lotplan.utils.ajaxRequest(i, "POST", a, function(e) {
+                    e && (window.location.href = "https://www.bpoint.com.au/" + e)
+                }, function(e) {
+                    l.alertType("danger"), l.alertMessage("<p>There was a problem with the request, please check that your details are correct.</p>")
+                })
+            }
+        }
+        var l, i = "https://propertysearch.dnrm.qld.gov.au/startTransaction";
+        return {
+            setup: r,
+            viewModel: a,
+            template: {
+                element: "cart"
+            },
+            synchronous: !0
+        }
+    }(jQuery, ko), "object" != typeof lotplan && (lotplan = {}), "object" != typeof lotplan.components && (lotplan.components = {}), lotplan.components.lotplansearchfields = function(e, t) {
+        function r() {
+			//debugger
+            e(document).on("loadingFinished", !1, function(e) {
+                l.loading(!1)
+            })
+        }
+
+        function a(e) {
+			//debugger
+            l = this, l.loading = t.observable(!1), l.isError = t.observable(!1), l.makeLotPlanSearch = o, l.resetLotPlanSearch = n, l.searchLot = t.observable(""), l.searchPlan = t.observable("")
+        }
+
+        function o(t, r) {
+			//debugger
+            l.loading(!0), this.isError(!1), lotplan.main.clearData(), l.searchLot(e(t).find("#lot_plan_search_lotno").val().trim()), l.searchPlan(e(t).find("#lot_plan_search_planno").val().toUpperCase().trim()), l.searchLot() && l.searchPlan() ? s() : (l.loading(!1), this.isError(!0))
+        }
+
+        function n(t, r) {
+			//debugger
+            e(r.target).closest("form").find('input[type="text"]').val(""), this.isError(!1), lotplan.main.clearData()
+        }
+
+        function s() {
+			//debugger
+            l.searchPlan().match("BUP") > 0 || l.searchPlan().match("SP") > 0 ? lotplan.utils.ajaxRequest(p + "BUP_LOTPLAN+%3D+%27" + l.searchLot() + l.searchPlan() + "%27", "GET", null, function(e) {
+                e && JSON.parse(e).features.length > 0 ? lotplan.utils.ajaxRequest(u + JSON.parse(e).features[0].attributes.OBJECTID, "GET", null, lotplan.components.searchresults.setSearchData.bind(l)) : (lotplan.components.searchresults.setSearchData.bind(null), l.isError(!0), l.loading(!1))
+            }) : lotplan.utils.ajaxRequest(c + "LOTPLAN+%3D+%27" + l.searchLot() + l.searchPlan() + "%27", "GET", null, function(e) {
+                if (JSON.parse(e).features.length > 0) {
+                    var t = "";
+                    for (var r in JSON.parse(e).features) r > 0 && (t += "+OR+"), t += "LOTPLAN+%3D+%27" + JSON.parse(e).features[r].attributes.LOTPLAN + "%27";
+                    lotplan.utils.ajaxRequest(i + t, "GET", null, lotplan.components.searchresults.setSearchData.bind(l))
+                } else lotplan.components.searchresults.setSearchData.bind(null), l.isError(!0), l.loading(!1)
+            })
+        }
+        var l, i = "https://gisservices.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandParcelPropertyFramework/MapServer/0/query?text=&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&returnIdsOnly=false&returnGeometry=true&outFields=*&f=json&returnCountOnly=false&where=",
+            c = "https://gisservices.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandParcelPropertyFramework/MapServer/4/query?text=&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&returnIdsOnly=false&returnGeometry=true&outFields=*&f=json&returnCountOnly=false&where=",
+            p = "https://gisservices.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandParcelPropertyFramework/MapServer/21/query?text=&geometryType=esriGeometryPoint&spatialRel=esriSpatialRelIntersects&returnIdsOnly=false&returnGeometry=true&outFields=*&f=json&returnCountOnly=false&where=",
+            u = "https://gisservices.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandParcelPropertyFramework/MapServer/21/queryRelatedRecords?relationshipId=1&outFields=*&definitionExpression=&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&returnZ=false&returnM=false&gdbVersion=&f=json&objectIds=";
+        return {
+            setup: r,
+            setError: function(e) {
+                l.isError(e)
+            },
+            viewModel: a,
+            template: {
+                element: "lotPlanSearchFields"
+            },
+            synchronous: !0
+        }
+    }(jQuery, ko), "object" != typeof lotplan && (lotplan = {}), "object" != typeof lotplan.components && (lotplan.components = {}), lotplan.components.receipt = function(e, t) {
+        function r() {
+            urlParams = lotplan.utils.getUrlParamsObject(), n.number(decodeURIComponent(urlParams.number)), n.date(decodeURIComponent(urlParams.date).replace(/\+/g, " ")), n.total(decodeURIComponent(urlParams.total)), n.email(decodeURIComponent(urlParams.email)), n.errorMessage(decodeURIComponent(urlParams.errorMessage).replace(/\+/g, " ")), setTimeout(function() {
+                lotplan.main.emptyCart()
+            }, 200)
+        }
+
+        function a(e) {
+			//debugger
+            n = this, n.newSearch = o, n.number = t.observable(), n.date = t.observable(), n.total = t.observable(), n.email = t.observable(), n.errorMessage = t.observable(), n.pats_server = t.observable(pats_server), n.products = t.observable()
+        }
+
+        function o(e, t) {
+			//debugger
+            window.location.hash = "page=search"
+        }
+        var n;
+        return pats_server = "https://propertysearch.dnrm.qld.gov.au", {
+            setup: r,
+            viewModel: a,
+            template: {
+                element: "receipt"
+            },
+            synchronous: !0
+        }
+    }(jQuery, ko), "object" != typeof lotplan && (lotplan = {}), "object" != typeof lotplan.components && (lotplan.components = {}), lotplan.components.review = function(e, t) {
+        function r() {}
+
+        function a(e) {
+			//debugger
+            l = this, l.added = t.observable(!1), l.backToSearch = o, l.newSearch = n, l.addToCart = s, l.lotplanGroupKeys = t.pureComputed(function() {
+                return Object.keys(l.lotplanGroups())
+            }), l.lotplanGroups = t.computed(function() {
+                for (var e = {}, t = lotplan.main.getSelectedData(), r = 0; r < t().length; r++) {
+                    var a = t()[r],
+                        o = "_" + a.LOT + a.PLAN;
+                    e[o] || (e[o] = {
+                        lotplan: a.LOT + "/" + a.PLAN,
+                        titles: [],
+                        products: t()[r].PRODUCTS(),
+                        address: a.ADDRESS
+                    }), e[o].titles.push(t()[r].LOT_TITLES())
+                }
+                return e
+            }), l.selectedProductAlreadyInCartTooltip = function(e, t) {
+                return lotplan.main.cartHelper().find({
+                    product: t,
+                    data: l.lotplanGroups()[e]
+                }, !0) ? "Added to cart" : "Add to cart"
+            }, l.selectedProductAlreadyInCart = function(e, t) {
+                return !!lotplan.main.cartHelper().find({
+                    product: t,
+                    data: l.lotplanGroups()[e]
+                }, !0)
+            }, l.checkSelectedProduct = function(e, t, r) {
+                if (r.target.disabled) lotplan.main.getSelectedProducts().remove(function(r) {
+                    return r.data === l.lotplanGroups()[e] && r.product === t
+                });
+                else {
+                    if (lotplan.main.cartHelper().find({
+                            product: t,
+                            data: l.lotplanGroups()[e]
+                        }, !0)) return !0;
+                    lotplan.main.getSelectedProducts().push({
+                        data: l.lotplanGroups()[e],
+                        product: t
+                    }), l.addToCart()
+                }
+                return !1
+            }, l.selectedProductTotal = t.pureComputed(function() {
+                for (var e = 0, t = 0; t < lotplan.main.getSelectedProducts()().length; t++) e += parseFloat(lotplan.main.getSelectedProducts()()[t].product.price);
+                return e
+            }), l.alertType = t.observable(""), l.alertMessage = t.observable(""), l.alertClose = function() {
+                l.alertType(""), l.alertMessage("")
+            }, l.productsLoading = lotplan.main.productsLoading();
+            for (var r = lotplan.main.getSelectedData()(), a = 0; a < r.length; a++) lotplan.main.setLotProduct(r[a])
+        }
+
+        function o(e, t) {
+			//debugger
+            lotplan.main.clearData(!1, !0, !0), window.location.hash = "page=search"
+        }
+
+        function n(e, t) {
+			//debugger
+            lotplan.main.clearData(!0, !0, !0), window.location.hash = "page=search"
+        }
+
+        function s(t, r) {
+			//debugger
+            var a = lotplan.main.getSelectedProducts();
+            lotplan.main.cartHelper().add(a(), !0, function() {
+                l.alertType("danger"), l.alertMessage("<p>You have reached the limit of your cart, no more products can be added.</p><p>Please proceed to the checkout and either purchase or remove items in your cart to continue ordering.</p>")
+            }) && (l.added(!0), e(".productcheckbox").each(function(t, r) {
+                e(r).is(":checked") && (e(r).removeAttr("checked").hide().before('<span class="glyphicon glyphicon-ok" data-toggle="tooltip" data-placement="top" title="This product has been added to your cart."></span>'), e(".glyphicon-tick").tooltip())
+            }), lotplan.main.clearData(!1, !1, !0))
+        }
+        var l;
+        return {
+            setup: r,
+            viewModel: a,
+            template: {
+                element: "review"
+            },
+            setAlert: function(e, t) {
+                l.alertType(e), l.alertMessage(t)
+            },
+            synchronous: !0
+        }
+    }(jQuery, ko), "object" != typeof lotplan && (lotplan = {}), "object" != typeof lotplan.components && (lotplan.components = {}), lotplan.components.searchresults = function(e, t) {
+        function r() {}
+
+        function a() {
+			//debugger
+            var e = L.map("map").setView([-33.86617516416043, 151.2077522277832], 15);
+            if (L.Icon.Default.imagePath = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/", L.tileLayer("https://api{s}.nowwhere.com.au/1.1.2/tile/50/{z}/{x}/{y}/?key=oDYTVpCsmigGKoxiy7ZxyNpIasMjEcMelJqTyz1x", {
+                    minZoom: 5,
+                    maxZoom: 18,
+                    attribution: "Map data &copy; MapData Services",
+                    subdomains: ["1", "2", "3", "4"]
+                }).addTo(e), r)
+                for (l = 0; l < r.length; l++) e.removeLayer(r[l]);
+            for (var t = L.latLngBounds([]), r = [], a = lotplan.main.getSearchData(), n = new L.Icon.Default({
+                    iconUrl: "https://www.dnrm.qld.gov.au/?a=332335"
+                }), s = new L.Icon.Default, l = 0; l < a().length; l++) {
+                var c, p = a()[l],
+                    u = p.attributes;
+                if (p.geometry.rings) {
+                    var d, m, h, f;
+                    for (var g in p.geometry.rings[0]) 0 == g && (d = p.geometry.rings[0][g][0], m = p.geometry.rings[0][g][0], h = p.geometry.rings[0][g][1], f = p.geometry.rings[0][g][1]), g > 0 && p.geometry.rings[0][g][0] < d && (d = p.geometry.rings[0][g][0]), g > 0 && p.geometry.rings[0][g][0] > m && (m = p.geometry.rings[0][g][0]), g > 0 && p.geometry.rings[0][g][1] < h && (h = p.geometry.rings[0][g][1]), g > 0 && p.geometry.rings[0][g][1] > f && (f = p.geometry.rings[0][g][1]);
+                    c = L.marker([(h - d) / 2, (m - d) / 2], {
+                        title: "Lot: " + u.LOT + " plan: " + u.PLAN,
+                        opacity: 1,
+                        icon: n
+                    })
+                } else c = L.marker([p.geometry.y, p.geometry.x], {
+                    title: "Lot: " + u.LOT + " plan: " + u.PLAN,
+                    opacity: 1,
+                    icon: n
+                });
+                c.on("click", function(e) {
+                    var t = lotplan.main.getSelectedData();
+                    ~t.indexOf(e.target.lotdata) ? t.remove(e.target.lotdata) : t.push(e.target.lotdata)
+                }), c.lotdata = u, r.push(c.addTo(e)), t.extend(c.getLatLng())
+            }
+            e.fitBounds(t), L.esri.featureLayer({
+                url: i,
+                style: {
+                    opacity: 0,
+                    weight: 1
+                },
+                onEachFeature: function(e, t) {
+                    t.setStyle({
+                        fill: !1,
+                        color: "#000"
+                    });
+                    for (var r = 0; r < a().length; r++) e.properties.LOT == a()[r].attributes.LOT && e.properties.PLAN == a()[r].attributes.PLAN && t.setStyle({
+                        fill: !0,
+                        color: "red"
+                    })
+                }
+            }).addTo(e), lotplan.main.getSelectedData().subscribe(function(e) {
+                e.length > 0 && lotplan.main.setLotProduct(e[e.length - 1]);
+                for (var t = 0; t < r.length; t++) r[t].setIcon(~e.indexOf(r[t].lotdata) ? s : n)
+            }), o()
+        }
+
+        function o() {
+			//debugger
+            e("#results tbody td").on("click", function(t) {
+                e(t.target).is("input") || e(t.target).parent().find("input").trigger("click")
+            })
+        }
+
+        function n(e) {
+			//debugger
+            l = this, l.waitingOnProducts = t.observable(!1), lotplan.main && lotplan.main.getSearchData() && lotplan.main.getSearchData()().length > 0 && a()
+        }
+
+        function s(r) {
+			//debugger
+            if (r) {
+                var o = JSON.parse(r);
+                if (o.relatedRecordGroups && o.relatedRecordGroups.length > 0 && (o.features = o.relatedRecordGroups[0].relatedRecords), o.features && o.features.length > 0) {
+                    for (var n = 0; n < o.features.length; n++) {
+                        var s = o.features[n].attributes;
+                        s.LOT_TITLES = t.observableArray(), s.LOT_VALID = t.observable(!1), s.PRODUCTS = t.observableArray()
+                    }
+                    lotplan.main.getSearchData()(o.features), a()
+                } else this.isError(!0), lotplan.main.getSearchData()(!1)
+            } else lotplan.main.getSearchData()(!1);
+            e(document).trigger("loadingFinished")
+        }
+        var l, i = "https://gisservices.information.qld.gov.au/arcgis/rest/services/PlanningCadastre/LandParcelPropertyFramework/MapServer/4";
+        return {
+            setup: r,
+            setupMap: a,
+            setSearchData: s,
+            viewModel: n,
+            template: {
+                element: "searchResults"
+            },
+            synchronous: !0
+        }
+    }(jQuery, ko), void 0 === lotplan) var lotplan = {};
+lotplan.utils = function(e) {
+    "use strict";
+
+    function t(t, r, a, o, n) {
+		//debugger
+        var s = e.ajax({
+            url: t,
+            method: r,
+            crossDomain: !0,
+            data: a,
+            timeout: 15e3,
+            xhrFields: {
+                withCredentials: !1
+            }
+        });
+        s.done(function(e, t, r) {
+            o(e)
+        }), s.fail(function(e, t, r) {
+            return n ? n.call(e) : void(401 == e.status && handleUnauthorised())
+        })
+    }
+
+    function r(r) {
+		//debugger
+        var a = e.Deferred();
+        return t(r, "GET", null, function(e) {
+            a.resolve(e)
+        }), a.promise()
+    }
+
+    function a(e) {
+		//debugger
+        return e = e || 0, "$" + parseFloat(e).toFixed(2)
+    }
+
+    function o() {
+		//debugger
+        e.Topic = function(t) {
+            var r, a = t && topics[t];
+            return a || (r = e.Callbacks(), a = {
+                publish: r.fire,
+                subscribe: r.add,
+                unsubscribe: r.remove
+            }, t && (topics[t] = a)), a
+        }
+    }
+
+    function n() {
+		//debugger
+        this.items = [], this.errors = []
+    }
+
+
+    function s(e, t) {
+		//debugger
+        this.maxLength = 3800, this.cookieTimeout = 60, this.cookieName = t || "", this.items = e
+    }
+
+    function l(e, t) {
+		//debugger
+        var r, a, o = 200,
+            n = function(e) {
+                e && e.abort && e.abort()
+            };
+        e.typeahead({
+            minLength: 3,
+            highlight: !1,
+            limit: 20
+        }, {
+            source: function(e, s, l) {
+                a && clearTimeout(a), n(r), a = setTimeout(function() {
+                    n(r), r = t.call(this, e, s, l)
+                }, o)
+            }
+        }), e.bind("typeahead:select", function(t, r) {
+            e.val(r), e.typeahead("val", r)
+        })
+    }
+
+    function i() {
+		//debugger
+        for (var e = {}, t = window.location.hash.substr(1).split("&"), r = 0, a = t.length; r < a; r++) {
+            var o = t[r].split("=");
+            e[o[0]] = o[1]
+        }
+        return e
+    }
+
+    function c(e, t, r) {
+		//debugger
+        var a = new Date;
+        a.setTime(a.getTime() + 60 * r * 60 * 1e3);
+        var o = "expires=" + a.toUTCString();
+        document.cookie = e + "=" + t + "; " + o
+    }
+
+    function p(e) {
+		//debugger
+        for (var t = e + "=", r = document.cookie.split(";"), a = 0; a < r.length; a++) {
+            for (var o = r[a];
+                " " == o.charAt(0);) o = o.substring(1);
+            if (0 == o.indexOf(t)) return o.substring(t.length, o.length)
+        }
+        return ""
+    }
+    return n.prototype.add = function(e, t) {
+		//debugger
+        return this.items.push({
+            msg: e,
+            fn: t
+        }), this
+    }, n.prototype.validate = function(e, t) {
+        for (var r = 0; r < this.items.length; r++) this.items[r].fn.call(e || this) || this.errors.push(this.items[r].msg);
+        return t ? t.call(this, this.valid(), this.errors.length) : this.valid()
+    }, n.prototype.errorMessage = function(e) {
+        for (var t = "<ul>", r = 0; r < this.errors.length; r++) t += "<li>" + this.errors[r] + "</li>";
+        return e + t + "</ul>"
+    }, n.prototype.valid = function() {
+        return !this.errors.length
+    }, s.prototype.remove = function(e) {
+        var t = !1,
+            r = this.find(e),
+            a = r ? this.items.indexOf(e) : -1;
+        return ~a && (t = !!this.items.splice(a, 1).length), this.updateCookie(), t
+    }, s.prototype.find = function(e, t) {
+        e = t ? this.converter.call(this, e) : e;
+        var r = null;
+        return this.forEach(this.items(), function(t, a) {
+            if (t === e || this.equality.call(this, t, e, a)) return !(r = t)
+        }), r
+    }, s.prototype.add = function(e, t, r) {
+        return e = t ? this.convert(e) : e, r && this.willExceedLimit(e, !1) ? (r.call(this), !1) : (this.items.push.apply(this.items, e), this.updateCookie(), !0)
+    }, s.prototype.willExceedLimit = function(e, t) {
+        var r = this.serialize().length,
+            a = this.serialize(t ? this.convert(e) : e).length;
+        return r + a > this.maxLength
+    }, s.prototype.getTotal = function() {
+        var e = 0;
+        return this.forEach(this.items(), function(t, r) {
+            e += parseFloat(this.getAmount.call(this, t, r))
+        }), e
+    }, s.prototype.forEach = function(e, t) {
+        for (var r = 0; r < e.length && t.call(this, e[r], r) !== !1; r++);
+    }, s.prototype.serialize = function(e) {
+        return e = e || this.items() || [], JSON.stringify(e)
+    }, s.prototype.updateCookie = function(e) {
+        c(this.cookieName, e ? "" : this.serialize(), this.cookieTimeout)
+    }, s.prototype.convert = function(e) {
+        var t = [];
+        return this.forEach(e, function(e, r) {
+            t.push(this.converter.call(this, e, r))
+        }), t
+    }, s.prototype.initalise = function(e) {
+        try {
+            this.items.push.apply(this.items, JSON.parse(lotplan.utils.getCookie(this.cookieName)))
+        } catch (t) {
+            this.updateCookie(!0)
+        }
+    }, s.prototype.converter = function(e, t) {
+        return {
+            i: e.product.pid,
+            a: e.product.price,
+            t: e.product.title,
+            l: e.product.lot,
+            pt: e.product.plan_type,
+            pn: e.product.plan_num
+        }
+    }, s.prototype.equality = function(e, t, r) {
+        return 1 == e.i ? e.i == t.i && e.t == t.t : !!(e.i = 2) && (e.i == t.i && e.pt == t.pt && e.pn == t.pn)
+    }, s.prototype.getAmount = function(e, t) {
+        return e.a
+    }, {
+        setupPubSub: o(),
+        multiAjaxRequest: r,
+        getUrlParamsObject: i,
+        ajaxRequest: t,
+        formatCurrency: a,
+        setCookie: c,
+        getCookie: p,
+        TypeaheadWrapper: l,
+        Validator: n,
+        Cart: s
+    }
+}(jQuery), "object" != typeof lotplan && (lotplan = {}), lotplan.main = function(e, t) {
+    "use strict";
+
+    function r() {
+		//debugger
+        m.isLoading(!0), t.components.register("lotplansearchfields", lotplan.components.lotplansearchfields), t.components.register("addresssearchfields", lotplan.components.addresssearchfields), t.components.register("searchresults", lotplan.components.searchresults), t.components.register("review", lotplan.components.review), t.components.register("cart", lotplan.components.cart), t.components.register("receipt", lotplan.components.receipt), t.applyBindings(m), a()
+    }
+
+    function a() {
+		//debugger
+        e(window).on("hashchange", function() {
+            n()
+        }), m.cartHelper.initalise(m.cartItems), e(document).ready(function() {
+            e("body").tooltip({
+                selector: "[data-toggle=tooltip]"
+            })
+        }), n()
+    }
+
+    function o() {
+		//debugger
+        m = this, m.isLoading = t.observable(), m.pageRoute = t.observable(""), m.selectedData = t.observableArray(), m.searchData = t.observableArray(), m.selectedProducts = t.observableArray(), m.productsLoading = t.observable(!1), m.errorText = t.observable(), m.formatCurrency = c, m.getLotSummary = p, m.cartItems = t.observableArray(), m.cartHelper = new lotplan.utils.Cart(m.cartItems, "cart"), m.viewDetails = d, m.goToCart = u, m.checkAllSearchData = s
+    }
+
+    function n() {
+        var e = lotplan.utils.getUrlParamsObject();
+        "review" === e.page ? m.selectedData().length > 0 ? (m.pageRoute("review"), lotplan.components.review.setup()) : (window.location.hash = "page=search", m.pageRoute("search"), i(!1, !0, !0), lotplan.components.addresssearchfields.setup(), lotplan.components.lotplansearchfields.setup()) : "review" === e.page ? (m.pageRoute("review"), lotplan.components.review.setup()) : "cart" === e.page ? (i(!0, !1, !0), m.pageRoute("cart"), lotplan.components.cart.setup()) : "receipt" === e.page ? (m.pageRoute("receipt"), lotplan.components.receipt.setup()) : void 0 !== e.page && "search" !== e.page || (window.location.hash = "page=search", m.pageRoute("search"), i(!1, !0, !0), lotplan.components.addresssearchfields.setup(), lotplan.components.lotplansearchfields.setup()), m.isLoading(!1)
+    }
+
+    function s(e, t) {
+		//debugger
+        if (m.selectedData.removeAll(), t.target.checked)
+            for (var r = 0; r < m.searchData().length; r++) m.selectedData.push(m.searchData()[r].attributes);
+        return !0
+    }
+
+    function l(e) {
+		//debugger
+        if (!(e.LOT_TITLES() && e.LOT_TITLES().count > 0)) {
+            var t = e.PLAN.match(/(\d+|\D+)/g);
+            t && t.length > 0 && (f++, m.productsLoading(!0), "CP" == t[0] || "LB" == t[0] || "RP" == t[0] || "SP" == t[0] || "UB" == t[0] || "BPA" == t[0] || "BRP" == t[0] || "BUP" == t[0] || "GRP" == t[0] || "GTA" == t[0] || "GTP" == t[0] || "MCP" == t[0] || "MPP" == t[0] || "MSP" == t[0] || "SBA" == t[0] || "SBP" == t[0] || "SPA" == t[0] || "SPS" == t[0] || "SRP" == t[0] || "SSP" == t[0] || (t[1] = t[0] + t[1], t[0] = "CP"), lotplan.utils.ajaxRequest(h, "POST", {
+                lotnum: e.LOT,
+                plannum: t[1],
+                plantype: t[0]
+            }, function(r) {
+                return !r || !r.titlerefs_count > 0 ? ("Service returned error." == r && lotplan.components.review.setAlert("danger", "There has been an unexpected error with our service. Please email <a href='mailto:propertysearch@dnrm.qld.gov.au?subject=Titles%20search%20service%20error'>web@dnrm.qld.gov.au</a> with the details of the property you are searching for."), "Service connection fault." == r && lotplan.components.review.setAlert("danger", "Sorry, our service has experienced a connection error. Please return to the search page and try again later. If you continue to have problems, email <a href='mailto:propertysearch@dnrm.qld.gov.au?subject=Titles%20search%20service%20downtime'>propertysearch@dnrm.qld.gov.au</a>."), "No title records found matching selection." == r && lotplan.components.review.setAlert("info", "We can't find any products for this lot on plan. In some cases, such as with water titles or community title schemes, a product may be available from our <a style='font-style:underline;' href='https://www.dnrm.qld.gov.au/our-department/contact-us/dnrm-business-centre-contacts' target='_blank'>business centres</a>."), m.productsLoading(!1), !1) : (e.LOT_VALID(!0), $.each(r.titlerefs, function(r, a) {
+                    e.LOT_TITLES().indexOf(a.title_reference) == -1 && (e.LOT_TITLES().push(a.title_reference), e.PRODUCTS().push({
+                        lot: e.LOT,
+                        plan_num: t[1],
+                        plan_type: t[0],
+                        pid: a.pid,
+                        title: a.title_reference,
+                        name: "Current title search " + a.title_reference,
+                        price: a.price,
+                        sample: "https://dnrm.qld.gov.au/__data/assets/pdf_file/0008/366128/title-search-sample.pdf"
+                    }))
+                }), "Y" == r.imaged_flag && JSON.stringify(e.PRODUCTS()).search(JSON.stringify({
+                    lot: e.LOT,
+                    plan_num: t[1],
+                    plan_type: t[0],
+                    pid: r.image_pid,
+                    name: "Survey plan " + e.LOT + "/" + t[0] + t[1],
+                    price: r.image_price,
+                    sample: "https://dnrm.qld.gov.au/__data/assets/file/0010/367840/survey-plan-sample.tiff"
+                })) == -1 && e.PRODUCTS().push({
+                    lot: e.LOT,
+                    plan_num: t[1],
+                    plan_type: t[0],
+                    pid: r.image_pid,
+                    name: "Survey plan " + e.LOT + "/" + t[0] + t[1],
+                    price: r.image_price,
+                    sample: "https://dnrm.qld.gov.au/__data/assets/file/0010/367840/survey-plan-sample.tiff"
+                }), f--, void(0 == f && m.productsLoading(!1)))
+            }, function(e) {
+                lotplan.componentnts.review.setAlert("danger", "There has been an unexpected error with our service. Please email <a href='mailto:web@dnrm.qld.gov.au?subject=Titles%20search%20service%20error'>web@dnrm.qld.gov.au</a> with the details of the property you are searching for."), m.productsLoading(!1)
+            }))
+        }
+    }
+
+    function i(e, t, r) {
+        (e || void 0 === e) && m.searchData().length && m.searchData.removeAll(), (t || void 0 === t) && m.selectedData().length && m.selectedData.removeAll(), (r || void 0 === r) && m.selectedProducts().length && m.selectedProducts.removeAll()
+    }
+
+    function c(e) {
+		//debugger
+        return "$" + parseFloat(e || 0).toFixed(2)
+    }
+
+    function p(e, t, r) {
+		//debugger
+        return "Lot on plan: " + (e + "/" + t) + (r ? " - Title: " + r : "")
+    }
+
+    function u(t, r) {
+		//debugger
+        e(r.target).attr("disabled", "disabled"), window.location.hash = "page=cart", i(!0, !1, !1)
+    }
+
+    function d(e, t) {
+		//debugger
+        window.scrollTo(0, 0), m.selectedProducts.removeAll(), window.location.hash = "page=review"
+    }
+    var m = new o,
+        h = "https://propertysearch.dnrm.qld.gov.au/productsAvailable",
+        f = 0;
+    return {
+        constructor: r(),
+        goToCart: u,
+        setLotProduct: l,
+        clearData: i,
+        productsLoading: function() {
+            return m.productsLoading
+        },
+        cartHelper: function() {
+            return m.cartHelper
+        },
+        emptyCart: function() {
+            return m.cartItems.removeAll(), m.cartHelper.updateCookie(!0), !0
+        },
+        getSearchData: function() {
+            return m.searchData
+        },
+        getSelectedData: function() {
+            return m.selectedData
+        },
+        getSelectedProducts: function() {
+            return m.selectedProducts
+        }
+    }
+}(jQuery, ko);

@@ -1,6 +1,6 @@
 package stanford.course3.week3
 
-Scanner scanner = new Scanner(new File("test.txt"))
+Scanner scanner = new Scanner(new File("mwis.txt"))
 def c = 1;
 def n = scanner.nextInt();
 def array = new int[n + 1]
