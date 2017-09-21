@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
-//专为KnapSack问题设计的节点类
 class KnapSackNode {
     private int curVal;
     private double estVal;
@@ -67,27 +66,24 @@ class KnapSackNode {
 
 }
 
-//本质上这是一个DFS,但是和一般DFS有两个不同的地方
-//一是在DFS的过程中，会把stack保持在一个非常小的体量
-//另外就是不会遍历完整棵树，大量运用剪枝技术
 public class KnapSackBranchBoundDepthFirst {
     /*Stack for DFS*/
     private Stack<KnapSackNode> stack;
     /*current optimal result*/
     private double curOpt;
-    /*物品的价值密度*/
+
     private double[] ratios;
-    /*按照物品的价值密度从高到底排序对应的物品下标*/
+
     private int[] indices;
     /*greedy optimal*/
     private double greedyOpt;
     /*relax optimal*/
     private double relaxOpt;
-    /*物品的价值*/
+
     private int[] vals;
-    /*物品的重量*/
+
     private int[] weights;
-    /*背包的容量*/
+
     private int capacity;
 
     public KnapSackBranchBoundDepthFirst(int[] vals, int[] weights, int capacity) {
@@ -123,11 +119,11 @@ public class KnapSackBranchBoundDepthFirst {
         }
     }
 
-    //从大到小排序
+
     public static void quickSort(int l, int r, double[] num, int[] index) {
         if (r <= l) return;
         double pivot = num[l];
-        // i j 两个指针
+
         int i = l + 1, j = l + 1;
         double temp;
         for (int k = l + 1; k <= r; k++) {
@@ -144,7 +140,7 @@ public class KnapSackBranchBoundDepthFirst {
                 j++;
             }
         }
-        //交换 注意是i-1
+
         temp = num[l];
         num[l] = num[i - 1];
         num[i - 1] = temp;
@@ -157,7 +153,7 @@ public class KnapSackBranchBoundDepthFirst {
         quickSort(i, r, num, index);
     }
 
-    //放缩函数，假定可以取分数件的物品
+
     public double relax(int index, int curCap) {
         double relaxReuslt = 0;
         int i = 0;
@@ -169,7 +165,7 @@ public class KnapSackBranchBoundDepthFirst {
             else if (indices[i] <= index) continue;
         }
 
-        if (i == weights.length) return relaxReuslt;        //在这种情况下，背包的容量能够装下所有的物品
+        if (i == weights.length) return relaxReuslt;
         else return relaxReuslt += (double) curCap / weights[indices[i]] * vals[indices[i]];
     }
 

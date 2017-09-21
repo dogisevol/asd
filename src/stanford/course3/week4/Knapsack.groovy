@@ -6,7 +6,7 @@ package stanford.course3.week4
 // Number of distinct items (n)
 // Knapsack capacity (W)
 
-Scanner scanner = new Scanner(new File("knapsack.txt"))
+Scanner scanner = new Scanner(new File("knapsack1.txt"))
 def c = 0;
 def W = scanner.nextInt() + 1
 def n = scanner.nextInt() + 1
